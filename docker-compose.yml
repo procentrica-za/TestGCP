@@ -1,0 +1,111 @@
+version: '3'
+services:
+    postgres:
+        build: ./sm-postgres/
+        env_file:
+            - "./sm-postgres/environment.env"
+        ports:
+            - "5432:5432"
+        volumes:
+            - "$HOME/docker/volumes/pgdata:/var/lib/postgresql/data"
+        restart: 'always'
+    pgadmin:
+        image: dpage/pgadmin4
+        depends_on:
+          - postgres
+        environment:
+          PGADMIN_DEFAULT_EMAIL: user@domain.com
+          PGADMIN_DEFAULT_PASSWORD: password
+        ports:
+            - "4321:80"
+    crud:
+        build: ./sm-service-crud/
+        depends_on:
+            - postgres
+        env_file:
+            - ./sm-service-crud/environment.env
+        ports:
+            - "9951:9951"
+        restart: 'always'
+    usermanager:
+        build: ./sm-service-user-manager/
+        depends_on:
+             - crud
+        env_file:
+              - ./sm-service-user-manager/environment.env
+        ports:
+              - "9952:9952"
+        restart: 'always'
+    advertisementmanager:
+        build: ./sm-service-advert-manager/
+        depends_on:
+              - crud
+        env_file:
+               - ./sm-service-advert-manager/environment.env
+        ports:
+              - "9953:9953"
+        restart: 'always'
+    emailmanager:
+        build: ./sm-service-email/
+        depends_on:
+            - usermanager
+        env_file:
+              - ./sm-service-email/environment.env
+        ports:
+             - "9954:9954"
+        restart: 'always'
+    filemanager:
+        build: ./sm-service-file-manager/
+        depends_on:
+            - crud
+        env_file:
+            - ./sm-service-file-manager/environment.env
+        ports:
+         - "9955:9955"
+        volumes:
+         - "$HOME/docker/volumes/filemanager/resources:/app/resources"
+        restart: "always"
+    messagingmanager:
+        build: ./sm-service-messaging/
+        depends_on:
+         - crud
+        env_file:
+         - ./sm-service-messaging/environment.env
+        ports:
+         - "9956:9956"
+        restart: 'always'
+    ratingmanager:
+        build: ./sm-service-rating/
+        depends_on:
+         - crud
+        env_file:
+         - ./sm-service-rating/environment.env
+        ports:
+         - "9957:9957"
+        restart: 'always'
+    textmanager:
+        build: ./sm-service-text/
+        depends_on:
+         - usermanager
+        env_file:
+         - ./sm-service-text/environment.env
+        ports:
+         - "9958:9958"
+    wso2is:
+        build: ./sm-wso2is-km
+        depends_on:
+         - postgres
+        ports:
+         - "9959:9445"
+    wso2apim:
+        build: ./sm-wso2-apim
+        depends_on:
+         - postgres
+        ports:
+         - "9960:9443"
+
+    
+        
+
+
+
